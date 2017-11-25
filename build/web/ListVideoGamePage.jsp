@@ -24,17 +24,30 @@
                 <td>RR Price</td>
                 <td>Platform</td>
             </tr>
-            <c:forEach var="videogame" begin="0" items="${requestScope.videogamesList}">
+            <c:forEach var="videogame" begin="0" items="${videogameList}">
             <tr>
-                <td>${videogame.getID()}</td>
+                <td>${videogame.getId()}</td>
                 <td>${videogame.getProdName()}</td>
                 <td>${videogame.getPubName()}</td>
                 <td>${videogame.getDevName()}</td>
                 <td>${videogame.getReleDate()}</td>
                 <td>${videogame.getRrPrice()}</td>
                 <td>${videogame.getPlatform()}</td>
+                <td>
+                    <form method="post" action="EditVideoGamePage.jsp">
+                          <input type="hidden" name="id" value="${videogame.getId()}">
+                        <input type="submit" value="Edit">
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="DeleteVideoGame">
+                          <input type="hidden" name="id" value="${videogame.getId()}">
+                        <input type="submit" value="Delete">
+                    </form>
+                </td>
             </tr>
             </c:forEach>
         </table>
+        <a href="CreateVideoGamePage.jsp">Create a video game entry</a>
     </body>
 </html>

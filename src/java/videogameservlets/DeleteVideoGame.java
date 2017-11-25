@@ -7,10 +7,6 @@ package videogameservlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -25,53 +21,17 @@ import mysqldatabase.VideogamesFacade;
  *
  * @author Eamonn Hannon
  */
-@WebServlet(name = "CreateVideoGame", urlPatterns = {"/CreateVideoGame"})
-
-public class CreateVideoGame extends HttpServlet {
+@WebServlet(name = "DeleteVideoGame", urlPatterns = {"/DeleteVideoGame"})
+public class DeleteVideoGame extends HttpServlet {
     @EJB
-    private VideogamesFacade videogamesFacade;
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+    private VideogamesFacade vmf;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String prodName = request.getParameter("prodName");
-        String pubName = request.getParameter("pubName");
-        String devname = request.getParameter("devName");
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        Date releDate = null;
-        System.out.println(prodName);
-        try
-        {
-            System.out.println(request.getParameter("releDate"));
-            releDate = df.parse(request.getParameter("releDate"));
-        }
-        catch(ParseException e)
-        {
-            System.err.println(e.getMessage());
-        }
-        int rrPrice = Integer.parseInt(request.getParameter("rrPrice"));
-        String platform = request.getParameter("platform");
-        int numEntries = videogamesFacade.count();
-        Videogames newGame = new Videogames(numEntries+1);
-        newGame.setProdName(prodName);
-        newGame.setPubName(pubName);
-        newGame.setDevName(devname);
-        newGame.setReleDate(releDate);
-        newGame.setRrPrice(rrPrice);
-        newGame.setPlatform(platform);
-        videogamesFacade.create(newGame);
-        
+        Videogames videogame = vmf.find(Integer.parseInt(request.getParameter("id")));
+        vmf.remove(videogame);
         RequestDispatcher rd = request.getRequestDispatcher("/ListVideoGame");
         rd.forward(request, response);
     }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.

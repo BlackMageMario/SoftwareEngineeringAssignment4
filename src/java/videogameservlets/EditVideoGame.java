@@ -6,11 +6,15 @@
 package videogameservlets;
 
 import java.io.IOException;
+import javax.validation.ConstraintViolationException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -18,6 +22,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
 import mysqldatabase.Videogames;
 import mysqldatabase.VideogamesFacade;
 
@@ -25,11 +30,9 @@ import mysqldatabase.VideogamesFacade;
  *
  * @author Eamonn Hannon
  */
-@WebServlet(name = "CreateVideoGame", urlPatterns = {"/CreateVideoGame"})
+@WebServlet(name = "EditVideoGame", urlPatterns = {"/EditVideoGame"})
+public class EditVideoGame extends HttpServlet {
 
-public class CreateVideoGame extends HttpServlet {
-    @EJB
-    private VideogamesFacade videogamesFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -39,12 +42,17 @@ public class CreateVideoGame extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @EJB
+    private VideogamesFacade vmf;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        System.out.println(request.getParameter("id"));
+        //Videogames findhelper = new Videogames(Integer.parseInt(request.getParameter("id")));
+        Videogames videogame = vmf.find(Integer.parseInt(request.getParameter("id")));
         String prodName = request.getParameter("prodName");
         String pubName = request.getParameter("pubName");
-        String devname = request.getParameter("devName");
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        String devName = request.getParameter("devName");
+        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
         Date releDate = null;
         System.out.println(prodName);
         try
@@ -58,17 +66,29 @@ public class CreateVideoGame extends HttpServlet {
         }
         int rrPrice = Integer.parseInt(request.getParameter("rrPrice"));
         String platform = request.getParameter("platform");
-        int numEntries = videogamesFacade.count();
-        Videogames newGame = new Videogames(numEntries+1);
-        newGame.setProdName(prodName);
-        newGame.setPubName(pubName);
-        newGame.setDevName(devname);
-        newGame.setReleDate(releDate);
-        newGame.setRrPrice(rrPrice);
-        newGame.setPlatform(platform);
-        videogamesFacade.create(newGame);
-        
-        RequestDispatcher rd = request.getRequestDispatcher("/ListVideoGame");
+        videogame.setProdName(prodName);
+        videogame.setDevName(devName);
+        videogame.setPubName(pubName);
+        videogame.setReleDate(releDate);
+        videogame.setRrPrice(rrPrice);
+        videogame.setPlatform(platform);
+        try
+        {
+            vmf.edit(videogame);
+        }
+        catch (ConstraintViolationException e) {
+            //log.log(Level.SEVERE,"Exception: ");
+            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+            Iterator it = violations.iterator();
+            ConstraintViolation<?> violation;
+            while(it.hasNext())
+            {
+                violation = (ConstraintViolation<?>) it.next();
+                System.out.println(violation.getMessage());
+            }
+            
+        }
+        RequestDispatcher rd = request.getRequestDispatcher("ListVideoGame");
         rd.forward(request, response);
     }
 

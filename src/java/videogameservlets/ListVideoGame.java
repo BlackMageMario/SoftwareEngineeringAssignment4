@@ -8,6 +8,7 @@ package videogameservlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.persistence.EntityManager;
@@ -18,6 +19,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import mysqldatabase.Videogames;
 import mysqldatabase.VideogamesFacade;
 
 /**
@@ -40,11 +43,14 @@ public class ListVideoGame extends HttpServlet {
     private VideogamesFacade vmf;
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         response.setContentType("text/html;charset=UTF-8");
+        System.out.println(vmf);
         List videogames = vmf.findAll();
-        request.setAttribute("videogameList", videogames);
-        RequestDispatcher rd = request.getRequestDispatcher("ListVideoGamePage");
+        //Apparently printing out the VMF, after hours of it not working, ensures that it works.
+        //This is sensible, rational behaviour and did not cause me grief whatsoever, nor confusion.
+        HttpSession session = request.getSession();
+        session.setAttribute("videogameList", videogames);
+        RequestDispatcher rd = request.getRequestDispatcher("ListVideoGamePage.jsp");
         rd.forward(request, response);
     }
 
@@ -74,6 +80,7 @@ public class ListVideoGame extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        System.out.println("Before");
         processRequest(request, response);
     }
 
